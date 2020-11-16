@@ -1,0 +1,23 @@
+{
+  "name": "Fyyur",
+  "version": "1.0.0",
+  "description": "Fyyur\r -----",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Trevorh5/Fyyur.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Trevorh5/Fyyur/issues"
+  },
+  "homepage": "https://github.com/Trevorh5/Fyyur#readme",
+  "dependencies": {
+    "bootstrap": "^3.4.1"
+  }
+}
