@@ -119,7 +119,7 @@ class VenueForm(Form):
         'facebook_link', validators=[URL()]
     )
     seeking_talent = BooleanField(
-        'seeking_talent'
+        'seeking_talent', render_kw={'checked': False}
     )
     seeking_description = TextAreaField(
         'seeking_description'
