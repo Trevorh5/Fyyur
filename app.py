@@ -15,6 +15,8 @@ from forms import *
 from flask_migrate import Migrate
 import sys
 from datetime import date, datetime
+from models import Venue, Artist, Show, db_setup
+from sqlalchemy import text
 
 #----------------------------------------------------------------------------#
 # App Config.
@@ -22,57 +24,7 @@ from datetime import date, datetime
 
 app = Flask(__name__)
 moment = Moment(app)
-app.config.from_object('config')
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-
-#----------------------------------------------------------------------------#
-# Models.
-#----------------------------------------------------------------------------#
-
-class Venue(db.Model):
-  __tablename__ = 'venues'
-
-  id = db.Column(db.Integer, primary_key=True)
-  name = db.Column(db.String, unique=True)
-  city = db.Column(db.String(120))
-  state = db.Column(db.String(120))
-  address = db.Column(db.String(120))
-  phone = db.Column(db.String(120))
-  website = db.Column(db.String(120))
-  image_link = db.Column(db.String(500))
-  genres = db.Column(db.ARRAY(db.String))
-  facebook_link = db.Column(db.String(120))
-  seeking_talent = db.Column(db.Boolean)
-  seeking_description = db.Column(db.String())
-  shows = db.relationship('Show', backref='venue')
-
-  def __repr__(self):
-    return f'<Venue {self.name}, {self.id}>'
-
-class Artist(db.Model):
-  __tablename__ = 'artists'
-
-  id = db.Column(db.Integer, primary_key=True)
-  name = db.Column(db.String, unique=True)
-  city = db.Column(db.String(120))
-  state = db.Column(db.String(120))
-  phone = db.Column(db.String(120))
-  website = db.Column(db.String(120))
-  image_link = db.Column(db.String(500))
-  genres = db.Column(db.ARRAY(db.String))
-  facebook_link = db.Column(db.String(120))
-  seeking_venue = db.Column(db.Boolean)
-  seeking_description = db.Column(db.String())
-  shows = db.relationship('Show', backref='artist')
-
-class Show(db.Model):
-  __tablename__ = 'shows'
-
-  id = db.Column(db.Integer, primary_key=True)
-  start_time = db.Column(db.DateTime, nullable=False)
-  artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'), nullable=False)
-  venue_id = db.Column(db.Integer, db.ForeignKey('venues.id'), nullable=False)
+db = db_setup(app)
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -127,7 +79,8 @@ def venues():
 def search_venues():
   search_term = request.form['search_term']
 
-  venues = Venue.query.filter(Venue.name.ilike('%{}%'.format(search_term))).all()
+  res = db.engine.execute(text(f"SELECT * FROM venues WHERE LOWER(name) LIKE LOWER('%{search_term}%')"))
+  venues = res.fetchall()
 
   response={
     "count": len(venues),
@@ -237,7 +190,7 @@ def create_venue_submission():
     db.session.close()
 
   if error:
-    flash('An error has occured, failed to create venue ' + name)
+    flash('An error has occured, failed to create venue ' + name, 'error')
   else: 
     flash('Venue ' + name + ' was successfully listed!')
 
@@ -263,7 +216,8 @@ def artists():
 def search_artists():
   search_term = request.form['search_term']
   
-  artists = Artist.query.filter(Artist.name.ilike('%{}%'.format(search_term))).all()
+  res = db.engine.execute(text(f"SELECT * FROM artists WHERE LOWER(name) LIKE LOWER('%{search_term}%')"))
+  artists = res.fetchall()
 
   response={
     "count": len(artists),
@@ -370,7 +324,7 @@ def create_artist_submission():
     db.session.close()
 
   if error:
-    flash('An error has occured, failed to create artist ' + name)
+    flash('An error has occured, failed to create artist ' + name, 'error')
   else: 
     flash('Artist ' + name + ' was successfully listed!')
 
@@ -482,7 +436,7 @@ def create_show_submission():
     db.session.close()
 
   if error: 
-    flash('An error occured, failed to list show')
+    flash('An error occured, failed to list show', 'error')
   else: 
     flash('Show was successfully listed!')
   
