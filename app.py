@@ -79,8 +79,7 @@ def venues():
 def search_venues():
   search_term = request.form['search_term']
 
-  res = db.engine.execute(text(f"SELECT * FROM venues WHERE LOWER(name) LIKE LOWER('%{search_term}%')"))
-  venues = res.fetchall()
+  venues = Venue.query.filter(Venue.name.ilike(f'%{search_term}%')).all()
 
   response={
     "count": len(venues),
@@ -216,8 +215,7 @@ def artists():
 def search_artists():
   search_term = request.form['search_term']
   
-  res = db.engine.execute(text(f"SELECT * FROM artists WHERE LOWER(name) LIKE LOWER('%{search_term}%')"))
-  artists = res.fetchall()
+  artists = Artist.query.filter(Artist.name.ilike(f'%{search_term}%')).all()
 
   response={
     "count": len(artists),
